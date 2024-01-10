@@ -7,6 +7,7 @@ public class HttpGetRequest : MonoBehaviour
 {
     public Text sensorDataText;
     public string arduinoIPAddress = "your-arduino-ip-address";
+    public float refreshInterval = 1f; // Interval v sekundah za osveževanje podatkov
 
     void Start()
     {
@@ -15,17 +16,21 @@ public class HttpGetRequest : MonoBehaviour
 
     IEnumerator GetSensorData()
     {
-        UnityWebRequest www = UnityWebRequest.Get("http://" + arduinoIPAddress);
-        yield return www.SendWebRequest();
+        while (true)
+        {
+            UnityWebRequest www = UnityWebRequest.Get("http://" + arduinoIPAddress);
+            yield return www.SendWebRequest();
 
-        if (www.isNetworkError || www.isHttpError)
-        {
-            Debug.Log(www.error);
-        }
-        else
-        {
-            // Show the sensor data in the Unity UI Text component
-            sensorDataText.text = www.downloadHandler.text;
+            if (www.isNetworkError || www.isHttpError)
+            {
+                Debug.Log(www.error);
+            }
+            else
+            {
+                sensorDataText.text = www.downloadHandler.text;
+            }
+
+            yield return new WaitForSeconds(refreshInterval);
         }
     }
 }
